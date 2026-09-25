@@ -1,26 +1,29 @@
-const { Evaluation } = require("../Models/Evaluation.Model");
-const { Feedback } = require("../Models/Feedback.Model");
+const SubmissionService = require("../Services/SubmissionService");
+const evaluationService = require("../Services/EvalutionService");
 const { Submission } = require("../Models/Submission.Model");
-const { evaluateSubmission } = require("../Services/Evalution.Service");
+const { Feedback } = require("../Models/Feedback.Model");
+
+const submissionService = new SubmissionService({
+  evaluationService,
+});
 
 async function handleSubmission(req, res) {
   const { content, problemId, language, contentType } = req.body;
 
-  // Basic validation
+  console.log(content);
+
   if (!content || !problemId || !contentType) {
     return res.status(422).json({
       message: "content, problemId, and contentType are required.",
     });
   }
 
-  // Validate contentType
   if (!["TEXT", "CODE"].includes(contentType)) {
     return res.status(422).json({
       message: "contentType must be either TEXT or CODE.",
     });
   }
 
-  // Language is required only for CODE
   if (contentType === "CODE" && !language) {
     return res.status(422).json({
       message: "language is required for code submissions.",
@@ -28,30 +31,24 @@ async function handleSubmission(req, res) {
   }
 
   try {
-    const submission = await Submission.create({
+    const result = await submissionService.createSubmission({
       userId: req.user.id,
       problemId,
-      submittedContent: content,
+      content,
       contentType,
-      language: contentType === "CODE" ? language : null,
+      language,
     });
 
-    if (!submission) {
-      return res.status(401).json({ message: "Error submission" });
-    }
-
-    const evaluation = await Evaluation.create({
-      submissionId: submission._id,
+    return res.status(200).json({
+      evaluationId: result.evaluation.id,
+      submissionId: result.submission.id,
     });
-
-    evaluateSubmission(evaluation._id);
-
-    return res
-      .status(200)
-      .json({ evaluationId: evaluation._id, submissionId: submission._id });
   } catch (error) {
     console.error("Submission creation failed:", error);
-    return res.status(500).json({ message: "Internal server error." });
+
+    return res.status(500).json({
+      message: "Internal server error.",
+    });
   }
 }
 
