@@ -1,0 +1,42 @@
+# Dependencies
+api/node_modules/
+web/node_modules/
+
+# Environment variables
+api/.env
+web/.env
+.env
+
+# Build / production
+api/dist/
+api/build/
+
+web/dist/
+web/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend cache
+web/.vite/
+
+# Backend cache / temporary
+api/tmp/
+api/temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/*
+!.vscode/extensions.json
+
+.idea/
+
+# Misc
+*.local
